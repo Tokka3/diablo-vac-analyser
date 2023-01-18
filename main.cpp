@@ -30,12 +30,48 @@ std::map<int, int> moduleCounter{
 std::map<int, bool> moduleLoaded{
 
 };
+BOOL DumpDataToDisk(PVOID data, ULONG size, std::string path)
+{
+    HANDLE fileHandle = CreateFileA(path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    if (!fileHandle)
+    {
+        printf("Failed to create dump file %X\n", GetLastError());
+        return GetLastError();
+    }
+
+    BOOL writeStat = WriteFile(fileHandle, data, size, 0, 0);
+    if (!writeStat)
+    {
+        printf("Failed to dump module %X\n", GetLastError());
+        CloseHandle(fileHandle);
+        return GetLastError();
+    }
+
+
+    CloseHandle(fileHandle);
+    return writeStat;
+}
+
+typedef int(__stdcall* t_originalRunFunc)(int scanId, DWORD* vacRequest, int vacRequestSize, PVOID returnBuffer, int* returnBufferSize);
+
+PVOID origRunFunc;
+
+static int hashId = 0;
+
+int __stdcall HkRunFunc(int scanId, DWORD* vacRequest, int vacRequestSize, PVOID returnBuffer, int* returnBufferSize)
+{
+    int scanRet = (*(int(__stdcall**)(int, PVOID, int, PVOID, int*))(&origRunFunc))(scanId, vacRequest, vacRequestSize, returnBuffer, returnBufferSize);
+
+    printf("done with scan %i\n", scanRet);
+    DumpDataToDisk(vacRequest, vacRequestSize, "C:\\Users\\admin\\Desktop\\csgo shit\\sploozemoduledumper\\dumpwithreq\\reqhashid_" + std::to_string(hashId) + ".txt");
+    return scanRet;
+}
 typedef DWORD(__stdcall* t_originalLoadModule)(ModuleInfo* ModuleStruct, char flags);
 
 t_originalLoadModule o_LoadModule;
 
 DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
-   
+
     static int modCount = 0;
     //printf("size, %d", ModuleStruct->size);
     moduleCounter[ModuleStruct->crc32]++;
@@ -45,7 +81,7 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
         moduleLoaded[ModuleStruct->crc32] = true;
         modCount++;
 
-        std::string modCounterString = "C:\\Users\\admin\\Desktop\\csgo shit\\sploozemoduledumper\\VAC_" + std::to_string(ModuleStruct->crc32) + ".dll";
+        std::string modCounterString = "C:\\Users\\admin\\Desktop\\csgo shit\\sploozemoduledumper\\dumpwithreq\\VAC_" + std::to_string(ModuleStruct->crc32) + ".dll";
         HANDLE hFile = CreateFileA((LPCSTR)modCounterString.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
         DWORD BytesWritten = 0;
@@ -54,15 +90,17 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
         CloseHandle(hFile);
         std::cout << "overwritten: " << BytesWritten << " bytes" << std::endl;
     }
-  
-   
 
-   // std::cout << "hook called: " << ModuleStruct->crc32 << " counter " << moduleCounter[ModuleStruct->crc32] << std::endl;
 
-    return o_LoadModule(ModuleStruct, flags);
+
+    // std::cout << "hook called: " << ModuleStruct->crc32 << " counter " << moduleCounter[ModuleStruct->crc32] << std::endl;
+    DWORD returnVal = o_LoadModule(ModuleStruct, flags);
+    hashId = ModuleStruct->crc32;
+    origRunFunc = ModuleStruct->runfunc;
+    ModuleStruct->runfunc = &HkRunFunc;
+
+    return returnVal;
 }
-
-
 
 PVOID Utils_findPattern(PCWSTR module, PCSTR pattern, SIZE_T offset)
 {
@@ -97,14 +135,18 @@ void main(HMODULE hModule) {
     }
    
 
-    PVOID add = (PVOID)((uintptr_t)GetModuleHandleA("steamservice.dll") + 0x58cf0);
-    std::cout << add << std::endl;
+    PVOID load_module_address = (PVOID)((uintptr_t)GetModuleHandleA("steamservice.dll") + 0x58cf0);
+   // PVOID run_func_address = (PVOID)((uintptr_t)GetModuleHandleA("steamservice.dll") + 0x2BBC);
+
+    std::cout << load_module_address << std::endl;
 
   
 
-   if (MH_CreateHook(add, &LoadModuleHk, (void**)&o_LoadModule) /*not too comfortable with the 3rd parameter */ == MH_OK) {
-       printf("hook successful \n");
+   if (MH_CreateHook(load_module_address, &LoadModuleHk, (void**)&o_LoadModule) /*not too comfortable with the 3rd parameter */ == MH_OK) {
+       printf("hook successful on LoadModule \n");
  }
+
+
 
  
    Sleep(100);
@@ -126,7 +168,7 @@ void main(HMODULE hModule) {
         }
     }
 
-    MH_RemoveHook(add);
+    MH_RemoveHook(load_module_address);
     MH_Uninitialize();
 
    
