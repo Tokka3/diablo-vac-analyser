@@ -1,0 +1,3 @@
+﻿  main.cpp
+C:\Users\admin\source\repos\diablo-vac-analyser\diablo-vac-analyser\main.cpp(88,28): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  diablo-vac-analyser.vcxproj -> C:\Users\admin\source\repos\diablo-vac-analyser\Debug\diablo-vac-analyser.dll
