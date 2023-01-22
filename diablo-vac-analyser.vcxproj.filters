@@ -5,14 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="minhook">
       <UniqueIdentifier>{e37e4f4d-9b9a-4860-957a-c0c614c1f14f}</UniqueIdentifier>
     </Filter>
@@ -21,6 +13,18 @@
     </Filter>
     <Filter Include="minhook\include">
       <UniqueIdentifier>{6f38b201-eb53-4504-b5f9-2104764fe1ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vac_data">
+      <UniqueIdentifier>{2035b1a1-8bd2-496a-8be3-d942542fa431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility">
+      <UniqueIdentifier>{51f9b9a7-7a48-40c6-af0d-d79652c453e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hooks">
+      <UniqueIdentifier>{257b250b-f30f-4b12-b16c-ed6aedf08595}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="global">
+      <UniqueIdentifier>{9bc8f9ac-d50d-4244-8fbc-9d0d38f1367f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -41,6 +45,12 @@
     </ClCompile>
     <ClCompile Include="src\hde\hde64.c">
       <Filter>minhook\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="utility.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="hooks.cpp">
+      <Filter>hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +77,18 @@
     </ClInclude>
     <ClInclude Include="include\MinHook.h">
       <Filter>minhook\include</Filter>
+    </ClInclude>
+    <ClInclude Include="utility.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="hooks.h">
+      <Filter>hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="vac_structs.h">
+      <Filter>vac_data</Filter>
+    </ClInclude>
+    <ClInclude Include="gvars.h">
+      <Filter>global</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
