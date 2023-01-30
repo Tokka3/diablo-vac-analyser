@@ -20,7 +20,7 @@ extern std::string folder;
 extern std::string module_folder;
 extern std::string request_folder;
 extern std::string procid_dump_folder;
-
+extern std::string scan_dump_folder;
 
 
 
@@ -43,11 +43,12 @@ void main(HMODULE hModule) {
     module_folder = "C:\\Users\\admin\\Desktop\\csgo shit\\moduledump\\" + utility::currentDateTime() + "\\modules";
     request_folder = "C:\\Users\\admin\\Desktop\\csgo shit\\moduledump\\" + utility::currentDateTime() + "\\requests";
    procid_dump_folder = "C:\\Users\\admin\\Desktop\\csgo shit\\moduledump\\" + utility::currentDateTime() + "\\procids";
-
+   scan_dump_folder = "C:\\Users\\admin\\Desktop\\csgo shit\\moduledump\\" + utility::currentDateTime() + "\\scans";
     _mkdir(folder.c_str());
     _mkdir(module_folder.c_str());
     _mkdir(request_folder.c_str());
     _mkdir(procid_dump_folder.c_str());
+    _mkdir(scan_dump_folder.c_str());
 
 
     PVOID load_module_address = (PVOID)((uintptr_t)GetModuleHandleA("steamservice.dll") + 0x58cf0);

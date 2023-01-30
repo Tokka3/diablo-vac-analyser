@@ -24,5 +24,6 @@ public:
 	static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
 	static BOOL DumpDataToDisk(PVOID data, ULONG size, std::string path);
 	static const std::string currentDateTime();
+	static DWORD GetSectionVa(PVOID base, const char* sectionName);
 };
 

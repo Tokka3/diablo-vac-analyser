@@ -26,6 +26,9 @@
     <Filter Include="global">
       <UniqueIdentifier>{9bc8f9ac-d50d-4244-8fbc-9d0d38f1367f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="retBuff">
+      <UniqueIdentifier>{ea32d523-1c93-4c84-9bb0-91f0952a8104}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

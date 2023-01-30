@@ -101,3 +101,29 @@ PVOID utility::Utils_findPattern(PCWSTR module, PCSTR pattern, SIZE_T offset)
     }
     return NULL;
 }
+
+DWORD utility::GetSectionVa(PVOID base, const char* sectionName)
+{
+    PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)base;
+    PIMAGE_NT_HEADERS32 ntHeaders = PIMAGE_NT_HEADERS32((DWORD)base + dosHeader->e_lfanew);
+
+
+    PIMAGE_SECTION_HEADER firstSection = IMAGE_FIRST_SECTION(ntHeaders);
+    if (!firstSection)
+    {
+        printf("Failed to find first section\n");
+        return 0;
+    }
+
+
+    for (size_t i = 0; i < ntHeaders->FileHeader.NumberOfSections; i++)
+    {
+        if (!strcmp(sectionName, (char*)firstSection[i].Name))
+        {
+            return firstSection[i].VirtualAddress;
+        }
+    }
+
+    printf("Failed to find %s section\n", sectionName);
+    return 0;
+}
