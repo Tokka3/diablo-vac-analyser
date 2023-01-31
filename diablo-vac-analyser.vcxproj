@@ -149,6 +149,7 @@
     <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="colour.hpp" />
     <ClInclude Include="gvars.h" />
     <ClInclude Include="hooks.h" />
     <ClInclude Include="include\MinHook.h" />

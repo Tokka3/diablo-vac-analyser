@@ -93,5 +93,8 @@
     <ClInclude Include="gvars.h">
       <Filter>global</Filter>
     </ClInclude>
+    <ClInclude Include="colour.hpp">
+      <Filter>global</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
