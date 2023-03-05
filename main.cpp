@@ -51,7 +51,7 @@ void main(HMODULE hModule) {
     _mkdir(scan_dump_folder.c_str());
 
 
-    PVOID load_module_address = (PVOID)((uintptr_t)GetModuleHandleA("steamservice.dll") + 0x58cf0);
+    PVOID load_module_address = (PVOID)((uintptr_t)GetModuleHandleA("steamservice.dll") + 0x58D10);
    // PVOID run_func_address = (PVOID)((uintptr_t)GetModuleHandleA("steamservice.dll") + 0x2BBC);
 
     std::cout << load_module_address << std::endl;

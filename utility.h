@@ -25,5 +25,11 @@ public:
 	static BOOL DumpDataToDisk(PVOID data, ULONG size, std::string path);
 	static const std::string currentDateTime();
 	static DWORD GetSectionVa(PVOID base, const char* sectionName);
+
 };
 
+DWORD get_section_address(PVOID base, const char* name);
+
+DWORD resolve_relative_address(PVOID base, DWORD virtual_add);
+
+DWORD get_image_base(PVOID pImageBase);
