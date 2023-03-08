@@ -3,6 +3,7 @@
 #include "gvars.h"
 #include <iomanip>
 #include "colour.hpp"
+#include <time.h>
 
 typedef int(__stdcall* t_originalRunFunc)(int scanId, DWORD* vacRequest, int vacRequestSize, PVOID returnBuffer, int* returnBufferSize);
 typedef int(__cdecl* t_originalMainScan)(PVOID a1, PVOID a2, DWORD* a3);
@@ -101,13 +102,25 @@ std::map<UINT64, int> scanRepeatCount{
 
 VAC_FUNCTION vac_fncs;
 
-int __cdecl MainScan(PVOID a1, PVOID a2, DWORD* a3) {
+struct _MAIN_SCAN_INFO {
+	PVOID original_address;
+	std::string identifier;
+};
+int __cdecl MainScan(_MAIN_SCAN_INFO* test, PVOID a1, PVOID a2, DWORD* a3) {
+	
+	std::cout << "test: " << test->identifier << std::endl;
+	std::cout << "a1: " << a1 << std::endl;
+	std::cout << "a2: " << a2 << std::endl;
+	std::cout << "a3: " << *a3 << std::endl;
 
+	std::cout << "mainscan hook called: " <<  test << std::endl;
+	Sleep(2000);
+	o_MainScan = (t_originalMainScan)test->original_address;
 	DWORD returnVal = o_MainScan(a1, a2, a3);
 	std::cout << "main scan hook called: " << std::hex << a2 << " | " << std::hex << &a2 << " | " << std::hex << (PVOID)a2 << std::endl;
 
-	utility::DumpDataToDisk(a2, *a3, scan_dump_folder + "\\scandump_" + std::to_string(module_data[originaltemp]->crc32) + "." + std::to_string(moduleCounter[originaltemp]) + ".txt");
-	utility::DumpDataToDisk(a1, 176, scan_dump_folder + "\\scanreq_" + std::to_string(module_data[originaltemp]->crc32) + "." + std::to_string(moduleCounter[originaltemp]) + ".txt");
+	utility::DumpDataToDisk(a2, *a3, scan_dump_folder + "\\scandump_" + test->identifier  + ".txt");
+	utility::DumpDataToDisk(a1, 176, scan_dump_folder + "\\scanreq_" + test->identifier + ".txt");
 
 
 	return returnVal;
@@ -134,7 +147,7 @@ int __stdcall HkRunFunc(int scanId, DWORD* vacRequest, int vacRequestSize, PVOID
 #include <winternl.h>
 
 int module_count = 0;
-char mov_addr_rax[] = "\xA3\x00\x00\x00\x00";
+
 void log_error(std::string str) {
 	std::cout << dye::red(str) << " " << std::hex << GetLastError() << std::endl;
 	Sleep(1000);
@@ -142,10 +155,14 @@ void log_error(std::string str) {
 
 }
 // steamservice.dll
+
+
 DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
+	time_t _tm = time(NULL);
 
+	struct tm* curtime = localtime(&_tm);
 
-	std::cout << "load module hook called: " << ModuleStruct->crc32 << std::endl;
+	std::cout << "load module hook called: " << ModuleStruct->crc32   << " | " <<asctime(curtime) << std::endl;
 	std::cout << "path: " << module_folder << std::endl;
 
 
@@ -193,6 +210,7 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
 				//std::cout << "function address: " << std::hex << DWORD(function_address) << std::endl;
 				function_address = (PBYTE)resolve_relative_address(ModuleStruct->origImage, (DWORD)function_address);
 				if (*(BYTE*)(function_address) != 0xA1) break;
+				
 
 				//	PrintData(function_address, 8);
 
@@ -206,11 +224,11 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
 
 
 					if (curr_byte == 0xC3) {
-						std::cout << "ret opcode" << std::endl;
+
 						break; // return opcode
 					}
 					if (curr_byte == 0xA1) {
-						std::cout << "a1 found" << std::endl;
+					
 						//function_address += 5;
 						continue;
 					}
@@ -222,7 +240,7 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
 						addr = (DWORD*)resolve_relative_address(ModuleStruct->origImage, (DWORD)addr);
 
 						if (addr[0] == 0 && addr[2] == 1) {
-							std::cout << "called" << std::endl;
+				
 
 							DWORD* curr_ref = addr;
 							DWORD scan_fn_virt = curr_ref[3];
@@ -302,6 +320,7 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
 				}
 				else {
 					std::cout << std::setw(15) << dye::yellow(scanhashMap[hash]) << std::endl;
+				
 
 					if (scanhashMap[hash] == "crash"){
 						std::cout << "returning from crash module" << std::endl;
@@ -360,11 +379,11 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
 
 
 			if (curr_byte == 0xC3) {
-				std::cout << "ret opcode" << std::endl;
+			
 				break; // return opcode
 			}
 			if (curr_byte == 0xA1) {
-				std::cout << "a1 found" << std::endl;
+			
 				//function_address += 5;
 				continue;
 			}
@@ -376,15 +395,62 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
 			
 
 				if (addr[0] == 0 && addr[2] == 1) {
-					std::cout << "called" << std::endl;
+				
 
 					DWORD* curr_ref = addr;
 					DWORD scan_fn_virt = curr_ref[3];
-
+					
 				
 					main_scan_count++;
 					// std::cout << "scan_add found " << std::hex << (DWORD)scan_add << std::endl;
 					PVOID mainscan_fnc_add = (PVOID)scan_fn_virt;
+					
+					
+
+					BYTE main_scan_hk[] =
+					
+						{
+					/*0*/	0x8B, 0x4C, 0x24, 0x0C, // mov ecx , [esp + 12]
+					/*4*/	0x51, // push ecx
+					/*5*/	0x8B, 0x4C, 0x24, 0x0C,  // mov ecx , [esp + 12]
+					/*9*/	0x51,// push ecx
+					/*10*/	0x8B, 0x4C, 0x24, 0x0C,  // mov ecx , [esp + 12]
+					/*14*/	0x51,// push ecx
+					/*15*/	0x68, 0x11, 0x11, 0x11, 0x11, // push our arg
+					/*20*/	0x68, 0x33, 0x33, 0x33, 0x33, // push address to return, virtualalloc add + offset (31) (add esp 16) 
+					/*25*/	0x68, 0x22, 0x22, 0x22, 0x22, // push hook address
+					/*30*/	0xC3, // ret (jump to hook address)
+					/*31*/	0x83, 0xC4, 0x10, // add esp 16 (clean stack)
+					/*34*/	0xC3  // ret
+					}
+					;
+					_MAIN_SCAN_INFO scan_info;
+					scan_info.original_address = mainscan_fnc_add;
+					scan_info.identifier = "get_fucked";
+
+					PVOID scan_info_str = VirtualAlloc(0, sizeof(_MAIN_SCAN_INFO), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+					memcpy(scan_info_str, &scan_info, sizeof(_MAIN_SCAN_INFO));
+
+					PVOID hook_add = VirtualAlloc(0, sizeof(main_scan_hk), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+
+					*((DWORD*)&main_scan_hk[26]) = (DWORD)MainScan;
+
+					*((DWORD*)&main_scan_hk[21]) = (DWORD)((DWORD)hook_add + 31);
+
+					*((DWORD*)&main_scan_hk[16]) = (DWORD)scan_info_str;
+					
+					std::cout << "hook add " << hook_add << std::endl;
+
+					DWORD oldProt = 0;
+
+					VirtualProtect(hook_add, sizeof(main_scan_hk), PAGE_EXECUTE_READWRITE, &oldProt);
+
+					memcpy(hook_add, main_scan_hk, sizeof(main_scan_hk));
+
+					VirtualProtect(hook_add, sizeof(main_scan_hk), oldProt, &oldProt);
+
+					curr_ref[3] = (DWORD)hook_add;
+
 
 					//  PrintData((PBYTE)mainscan_fnc_add, 40);
 					_MAIN_SCAN add;
@@ -453,13 +519,21 @@ DWORD __stdcall LoadModuleHk(ModuleInfo* ModuleStruct, char flags) {
 		UINT64* fnAddr = (UINT64*)vac_fncs.mainscan_fns[i].main_scan_address;
 		for (size_t i = 0; i < size / sizeof(UINT64); i++)
 		{
-			hash += fnAddr[i];
+			hash += fnAddr[i]; //read access violation: fnAddr was 0x50F1112
+
 		}
+		
+
+	
+		
+		//VirtualProtect(vac_fncs.mainscan_fns[i].main_scan_address, sizeof(main_scan_hk), curProtection, &temp);
 		if (scanhashMap[hash].empty()) {
 			std::cout << dye::yellow("unknooeuwn") <<  " " << hash <<  std::endl;
 		}
 		else {
 			std::cout << dye::yellow(scanhashMap[hash]) << std::endl;
+		
+			
 		}
 
 	}

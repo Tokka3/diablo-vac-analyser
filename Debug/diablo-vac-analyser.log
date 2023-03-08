@@ -1,2 +1,4 @@
-﻿  utility.cpp
+﻿  hooks.cpp
+C:\Users\admin\source\repos\diablo-vac-analyser\diablo-vac-analyser\hooks.cpp(290): warning C4715: '<lambda_97f6325fd9aba07241fb153ddac10435>::operator()': not all control paths return a value
+C:\Users\admin\source\repos\diablo-vac-analyser\diablo-vac-analyser\hooks.cpp(500): warning C4715: '<lambda_dffa0c0c4a72947ed09be6c8906caed3>::operator()': not all control paths return a value
   diablo-vac-analyser.vcxproj -> C:\Users\admin\source\repos\diablo-vac-analyser\Debug\diablo-vac-analyser.dll
